@@ -4,6 +4,8 @@
 // AND PRINTS INFO ABOUT THEM
 // PROCESSES ARE STORED UNDER /proc FOLDER AND DATA CAN BE ACCESSED
 // IN THE status FILE UNDER EACH PROCESS
+// compile: gcc <name.c> -o <name>
+// run: ./<name>
 //------------------------------------------------------------------------
 
 #include <stdio.h>
