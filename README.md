@@ -32,7 +32,7 @@ Install the ssh server:
 ## Compiling 
 
 For .c files:
->gcc <name.c> -o <name>
+>gcc filename.c -o appname
 
 For .cpp files:
->g++ -I -Wall -o <name> <name.cpp>
+>g++ -I -Wall -o appname filename.cpp
