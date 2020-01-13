@@ -28,3 +28,11 @@ Install ifconfig for network configuration:
 
 Install the ssh server: 
 >sudo apt install openssh-server
+
+## Compiling 
+
+For .c files:
+>gcc <name.c> -o <name>
+
+For .cpp files:
+>g++ -I -Wall -o <name> <name.cpp>
