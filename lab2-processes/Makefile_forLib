@@ -1,0 +1,27 @@
+CC=g++      # compiler g++
+CFLAGS=-I   # add rearch for .h files
+CFLAGS+=-Wall # add extra warnings on compilation
+CFLAGS+=-c # option for incremental compilation when using multiple files
+AR=ar # ar is the option to maintain file archinves to add/delete members of an archive
+
+# build command for compilation as g++ -I -Wall -c pidUtil.cpp -o pidUtil.o
+# -o option means the output will be an object file to be used later
+pidUtil: pidUtil.cpp
+        $(CC) $(CFLAGS) pidUtil.cpp -o pidUtil.o
+
+# compile the object file into a library .a
+# option rcs creates the archive, insert files and write object file index
+lib: pidUtil.o
+        $(AR) rcs libPidUtil.a pidUtil.o
+
+# removes .o and .a files to prepare for a new build
+clean:
+        rm -f *.o *.a
+
+# copies the new lib to a specified folder
+install:
+        cp libPidUtil.a ../.
+        cp pidUtil.h ../.
+
+#when "make all" forllow the script pidutil and lib to completely build the library 
+all: pidUtil lib
