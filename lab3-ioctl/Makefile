@@ -10,4 +10,3 @@ clean:
 	rm -f lab3  
 
 all: Lab3Test
-# Run the make file as 'make all'
