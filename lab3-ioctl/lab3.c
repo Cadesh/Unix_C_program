@@ -20,16 +20,22 @@ char* getStatusDescription (const int cdStatus) {
     {
         case CDS_TRAY_OPEN:
             description = "Tray is open";
+            break;
         case CDS_NO_DISC:
             description = "No Disk";
+            break;
         case CDS_DRIVE_NOT_READY:
             description = "Drive not ready";
+            break;
         case CDS_DISC_OK:
             description = "Disk OK";
+            break;
         case -1: // error
             description = "Error";
+            break;
         case CDS_NO_INFO:
             description = "No Information";
+            break;
         otherwise:
             description = "Unkown Status code";
 
@@ -44,8 +50,18 @@ char* getStatusDescription (const int cdStatus) {
 int main (int argc, char* argv[])
 {
     int select = 5;
+
+    // 1. Access CDROM file
+    char *lFile = "/dev/dvd"; // dvd is the name of the file
+    int cdFile = open(lFile, O_RDONLY | O_NONBLOCK);
+    // if cannot access cdrom gives an error
+    if(cdFile == -1){
+        printf("Failed to open '%s'\n", lFile);
+        select = 0;
+    }
+
     while(select!=0) {
-        // 1. Menu
+        // 2. Menu
         char menu;
         printf("\nMENU");
         printf("\n 1. Eject CD-ROM");
@@ -58,14 +74,6 @@ int main (int argc, char* argv[])
         printf("Option Selected: %d\n", select);
         getchar(); // wait the user type something to continue
 
-        // 2. Access CDROM file
-        char *lFile = "/dev/dvd"; // dvd is the name of the file
-        int cdFile = open(lFile, O_RDONLY | O_NONBLOCK);
-        // if cannot access cdrom gives an error
-        if(cdFile == -1){
-            printf("Failed to open '%s'\n", lFile);
-            select = 0;
-        }
 
         // 3. Process Menu Selection
         switch(select)
@@ -92,10 +100,9 @@ int main (int argc, char* argv[])
                 printf("\nInvalid Option");
                 break;
             }
-    close(cdFile); // close CDROM file
     printf("\n\n");
     }
-
+close(cdFile); // close CDROM file
 return 0;
 }
 //------------------------------------
