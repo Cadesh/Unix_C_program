@@ -24,7 +24,7 @@ int main()
 
     // 1. List interface names
     cout << "Available interfaces:\n";
-    system("ls /sys/class/net");
+    system("ifconfig -a");
 
     cout << "Enter the interface name: ";
     cin >> if_name;
