@@ -1,6 +1,6 @@
 //Lab5.cpp - process monitor parent
 //
-// 05-Feb-20  M. Watler         Created.
+// 05-Feb-20  M. Watler   Created.
 //
 // Lab5.cpp student Andre Rosa 115997173
 // Question7: There are no specific reason for the order of the processes to be executed
@@ -44,19 +44,26 @@ int main(void)
             cout << "\nchild:main: pid:"<< getpid() << " - parent: pid:" << getppid() << endl;
             isParent=false;
 
-            const char *cmd = "./procMonitor";
-            char *args[3];
-            args[0] = "./procMonitor";
-            char *sBegin;
+            //2. create array of args
+            char *arrayOfArgs[4];
+            arrayOfArgs[0] = new char [15];
+            strcpy( arrayOfArgs[0], "./procMonitor" );
+
+            char *sBegin = new char [4]; 
             sprintf(sBegin, "%d", begin);
-            args[1] = sBegin;
-            char *sEnd;
+            arrayOfArgs[1] = new char [4];
+            strcpy( arrayOfArgs[1], sBegin);
+
+            char *sEnd = new char [4];
             sprintf(sEnd, "%d", end);
-            args[2] = sEnd;
+            arrayOfArgs[2] = new char [4];
+            strcpy( arrayOfArgs[2], sEnd);
 
-            execvp(cmd, args); // pass paramenters
+            arrayOfArgs[3] = NULL; //last param must be NULL
 
-            // 2. If your exec fails, print out the system error message strerror(errno)
+            execvp(arrayOfArgs[0], arrayOfArgs); // pass paramenters
+
+            // 3. If your exec fails, print out the system error message strerror(errno)
             // execvp exits 'if', if it is here we got an error
             cout << "child:main: pid:"<<getpid()<<" could not start child!"<<endl;
 	        cout<<strerror(errno)<<endl;
