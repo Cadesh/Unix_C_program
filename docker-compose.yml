@@ -1,0 +1,35 @@
+# docker-compose -f stack.yml
+# go to http://localhost:9000 for nginx
+# go to http://localhost:9001 for php
+# go to http://localhost:9002 for mysql
+
+version: '3.3'
+services:
+   nginx:
+    image: nginx:latest
+    restart: always
+    ports:
+      - "9000:80"
+
+   php:
+    image: php:latest
+    restart: always
+    ports:
+      - "9001:80"
+
+
+   db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+
+   adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 9002:8080
+
+# stop all containers: docker stop $(docker ps -a -q)
+# remove all constiners: docker rm $(docker ps -a -q)
