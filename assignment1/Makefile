@@ -1,13 +1,16 @@
-CC=g++                # Select Compiler (gcc)
-CFLAGS=-I             # 
-CFLAGS+=-Wall      
-FILES=lab4.cpp        # File names to be compiled
+CC=g++
+CFLAGS=-I
+CFLAGS+=-Wall
+FILES1=netMonitor.cpp
+FILES2=ifMonitor.cpp
 
-Lab4Test: $(FILES)       
-	$(CC) $(CFLAGS) $(FILES) -o Lab4
+netMon: $(FILES1)
+	$(CC) $(CFLAGS) -o netMonitor $(FILES1)
 
+ifMon: $(FILES2)
+	$(CC) $(CFLAGS) -o ifMonitor $(FILES2)
 
 clean:
-	rm -f lab4
+	rm -f *.o netMonitor procMonitor
 
-all: Lab4Test
+all: netMon ifMon

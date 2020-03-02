@@ -32,18 +32,21 @@ int main(int argc, char *argv[])
     }
     while(isRunning) {
 
+        // line 1
         string path = "/sys/class/net/" + iName + "/";
         string operstateVal;
         string up_countVal; 
         string down_countVal;
-        // string srx_bytes;
-        // string srx_dropped;
-        // string srx_errors;
-        // string srx_packets;
-        // string stx_bytes;
-        // string stx_dropped;
-        // string stx_errors;
-        // string tx_packets;
+        // line 2
+        string rx_bytes;
+        string rx_dropped;
+        string rx_errors;
+        string rx_packets;
+        // line 3
+        string tx_bytes;
+        string tx_dropped;
+        string tx_errors;
+        string tx_packets;
 
         string operstatePath = path + "operstate";
         ifstream infile(operstatePath.c_str());
@@ -69,10 +72,80 @@ int main(int argc, char *argv[])
             }
             infile3.close();
         }
+        // line 2
+        string rx_bytesPath = path + "statistics/rx_bytes";
+        ifstream infile4(rx_bytesPath.c_str());
+        if(infile4.is_open()) {
+            while(!infile4.eof()) {
+               infile4 >> rx_bytes;  
+            }
+            infile4.close();
+        }
+        string rx_droppedPath = path + "statistics/rx_dropped";
+        ifstream infile5(rx_droppedPath.c_str());
+        if(infile5.is_open()) {
+            while(!infile5.eof()) {
+               infile5 >> rx_dropped;  
+            }
+            infile5.close();
+        }
+        string rx_errorsPath = path + "statistics/rx_errors";
+        ifstream infile6(rx_errorsPath.c_str());
+        if(infile6.is_open()) {
+            while(!infile6.eof()) {
+               infile6 >> rx_errors;  
+            }
+            infile6.close();
+        }
+        string rx_packetsPath = path + "statistics/rx_packets";
+        ifstream infile7(rx_packetsPath.c_str());
+        if(infile7.is_open()) {
+            while(!infile7.eof()) {
+               infile7 >> rx_packets;  
+            }
+            infile7.close();
+        }
+        //line 3
+        string tx_bytesPath = path + "statistics/tx_bytes";
+        ifstream infile8(tx_bytesPath.c_str());
+        if(infile8.is_open()) {
+            while(!infile8.eof()) {
+               infile8 >> tx_bytes;  
+            }
+            infile8.close();
+        }
+        string tx_droppedPath = path + "statistics/tx_dropped";
+        ifstream infile9(tx_droppedPath.c_str());
+        if(infile9.is_open()) {
+            while(!infile9.eof()) {
+               infile9 >> tx_dropped;  
+            }
+            infile9.close();
+        }
+        string tx_errorsPath = path + "statistics/tx_errors";
+        ifstream infile10(tx_errorsPath.c_str());
+        if(infile10.is_open()) {
+            while(!infile10.eof()) {
+               infile10 >> tx_errors;  
+            }
+            infile10.close();
+        }
+        string tx_packetsPath = path + "statistics/tx_packets";
+        ifstream infile11(tx_packetsPath.c_str());
+        if(infile11.is_open()) {
+            while(!infile11.eof()) {
+               infile11 >> tx_packets;  
+            }
+            infile11.close();
+        }
 
         cout<< "Interface:" << iName << " state:" << operstateVal << " up_count:" <<up_countVal << 
-        " down_count" << down_countVal << endl;
-
+        " down_count:" << down_countVal << endl;
+        cout << " rx_bytes:" << rx_bytes << " rx_dropped:" << rx_dropped << " rx_errors:" << rx_errors << 
+        " rx_packets:" << rx_packets << endl;
+        cout << " tx_bytes:" << tx_bytes << " tx_dropped:" << tx_dropped << " tx_errors:" << tx_errors << 
+        " tx_packets:" << tx_packets << endl;
+        
 	sleep(1);
     }
 

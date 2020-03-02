@@ -9,14 +9,20 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <vector>
-
+#include <signal.h>
 #include <ifaddrs.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define NAME_SIZE 16
 
 using namespace std;
+static void sigHandler(int sig);
+
+bool isRunning=true;
+bool isParent = true;
 
 //---------------------------------------------------
 // RETURN A LIST OF INTERFACE NAMES (SPACE SEPARATED)
@@ -73,11 +79,68 @@ vector <string> processNames (string interfaceNamesStr) {
 void printArray (vector <string> pStrs) {
 
    for (int count = 0; count < pStrs.size(); count++)   
-       cout << pStrs[count] << endl;
-  
+       cout << pStrs[count] << " ";
+
+
+   cout << endl;
    return;
 }
 //--------------------------------------------------
+
+//--------------------------------------------------
+// KILL CHILDREN AND EXIT THE PROGRAM IN A CTORL+C
+static void sigHandler(int sig)
+{
+    switch(sig) {
+        case SIGINT://
+            cout<<" interrupt signal"<<endl;
+            exit (0);
+	    break;
+	default:
+	    cout<<"sigHandler: Undefined signal"<<endl;
+    }
+}
+//--------------------------------------------------
+
+
+// char *args[][3] = {{"./intfMonitor", "lo", NULL},
+//                    {"./intfMonitor", "ens33", NULL}};
+//--------------------------------------------------
+int systemMonitor(vector<string> interfaceNames)//run by the parent process
+{
+    int status=-1;
+    pid_t pid=0;
+    const int NUM=interfaceNames.size();
+    pid_t childPid[NUM];
+
+    while(isRunning && pid>=0) {
+        cout << "parent:systemMonitor: pid:"<<getpid()<<endl;
+        pid=wait(&status);//blocking. waitpid() is non-blocking and
+	                  //waits for a specific pid to terminate
+        cout << "parent:systemMonitor: status:"<<status<<". The child pid:"<<pid<<" has finished"<< endl;
+        //find the child that has terminated and restart it.
+	bool isFound=false;
+	for(int i=0; i<NUM && isParent && !isFound; ++i) {
+            if(pid==childPid[i]) {
+                isFound=true;
+                cout<<"parent:systemMonitor: Restart the child process"<<endl;
+                childPid[i] = fork();
+                if(childPid[i]==0) {//the child
+                    cout << "child:main: pid:"<<getpid()<<endl;
+                    isParent=false;
+                    char * ifName = const_cast<char*>(interfaceNames[i].c_str());
+                    char *args[3] = {"./ifMonitor", ifName, NULL};
+                    execvp(args[0], args);
+                    cout << "child:main: pid:"<<getpid()<<" I should not get here!"<<endl;
+	            cout<<strerror(errno)<<endl;
+                }
+            }	
+        }
+    }
+
+    return 0;
+}
+//---------------------------------------------------
 
 int main()
 {
@@ -86,6 +149,12 @@ int main()
     string interfaceStr = "";
     string input = "";
     vector<string> interfaceNames;
+    sighandler_t err1=signal(SIGINT, sigHandler);
+    if(err1==SIG_ERR) {
+       cout<<"Cannot create the signal handler"<<endl;
+       cout<<strerror(errno)<<endl;
+       return -1;
+    }
 
     //system("clear");
     do {
@@ -117,15 +186,20 @@ int main()
                         cout << "Monitor all" << endl;
                         interfaceStr = getInterfacesList();
                         interfaceNames = processNames (interfaceStr);
-                        //printArray(interfaceNames);
-                        // call function to monitor
+                        cout << "Monitoring " << interfaceNames.size() << " interfaces" << endl;
+                        printArray(interfaceNames);
+                        systemMonitor(interfaceNames);
+                        selection = 0;
                         
                         break;
                     } else { // another number?
                         cout << "Type the interface names to monitor (space separated)" << endl;
                         getline(cin, input);
                         interfaceNames = processNames (input);
-                        //printArray(interfaceNames);
+                        cout << "Monitoring " << interfaceNames.size() << " interfaces" << endl;
+                        printArray(interfaceNames);
+                        systemMonitor(interfaceNames);
+                        selection = 0;
                         break;
                     } 
                     
@@ -140,7 +214,7 @@ int main()
             char key;
             cout << "Press any key to continue: ";
             cin >> key;
-            while ((getchar()) != '\n'); 
+            //while ((getchar()) != '\n'); 
             //system("clear");
         }
     } while (selection!=0);
