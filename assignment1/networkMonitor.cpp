@@ -123,6 +123,7 @@ int main(int argc, char** argv)
     //----------------------------
     // 5. START CLIENTS
     // 5.1 Loop to reate client with parameter as name
+    // COMMENT HERE TO RUN MANUAL VERSION
     cout << "starting clients " << endl;
     for (int i = 1; i < argc; i++) {
         char cmd[50];
