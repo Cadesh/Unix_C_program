@@ -3,8 +3,6 @@
 
 // TODO LIST:
 // SERVER netMonitor
-// 1 - Test Quit/Shutdown from server
-// 2 - Test reactivation of interface (see function setLinkUp)
 // 3 - Todo client "Done" message (see documentation page 4)
 
 
