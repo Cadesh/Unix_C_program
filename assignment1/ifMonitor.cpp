@@ -147,79 +147,77 @@ void printMonitor(string iName, int fd)
         }
 
         // 1.3 CHECK IF THE INTERFACE IS DOWN
-        if (operstateVal.compare("up") != 0) { // if it is not 'up'
+        if ((operstateVal.compare("up") != 0) && (operstateVal.compare("unknown") != 0)) { // if it is not 'up'
             isMonitoring = false; // exit loop
             send(fd, "link down", strlen("link down"), 0 ); //alert server that interface is down
         }
 
         // 1.4 PRINT OUTPUT TO SCREEN
-        cout<< "Interface:" << iName << " state:" << operstateVal << " up_count:" <<up_countVal << 
-        " down_count:" << down_countVal << endl;
-        cout << " rx_bytes:" << rx_bytes << " rx_dropped:" << rx_dropped << " rx_errors:" << rx_errors << 
-        " rx_packets:" << rx_packets << endl;
-        cout << " tx_bytes:" << tx_bytes << " tx_dropped:" << tx_dropped << " tx_errors:" << tx_errors << 
-        " tx_packets:" << tx_packets << endl;
+        // cout<< "Interface:" << iName << " state:" << operstateVal << " up_count:" <<up_countVal << 
+        // " down_count:" << down_countVal << endl;
+        // cout << " rx_bytes:" << rx_bytes << " rx_dropped:" << rx_dropped << " rx_errors:" << rx_errors << 
+        // " rx_packets:" << rx_packets << endl;
+        // cout << " tx_bytes:" << tx_bytes << " tx_dropped:" << tx_dropped << " tx_errors:" << tx_errors << 
+        // " tx_packets:" << tx_packets << endl;
 
         // 1.5 PRINT OUTPUT TO FILE DESCRIPTOR 
-        // char msg[200];
-        // strcpy (msg, "Interface:");
-        // strcat (msg, iName.c_str() );
-        // strcat (msg, " state:");
-        // strcat (msg, operstateVal.c_str() );
-        // strcat (msg, " up_count:" );
-        // strcat (msg, up_countVal.c_str() );
-        // strcat (msg, " down_count:"  );
-        // strcat (msg, down_countVal.c_str() );
+        char msg[200];
+        strcpy (msg, "Interface:");
+        strcat (msg, iName.c_str() );
+        strcat (msg, " state:");
+        strcat (msg, operstateVal.c_str() );
+        strcat (msg, " up_count:" );
+        strcat (msg, up_countVal.c_str() );
+        strcat (msg, " down_count:"  );
+        strcat (msg, down_countVal.c_str() );
 
-        // strcpy (msg, " rx_bytes:");
-        // strcat (msg, rx_bytes.c_str() );
-        // strcat (msg, " rx_dropped:");
-        // strcat (msg, rx_dropped.c_str() );
-        // strcat (msg, " rx_errors:" );
-        // strcat (msg, rx_errors.c_str() );
-        // strcat (msg, " rx_packets:"  );
-        // strcat (msg, rx_packets.c_str() );
+        strcat (msg, " rx_bytes:");
+        strcat (msg, rx_bytes.c_str() );
+        strcat (msg, " rx_dropped:");
+        strcat (msg, rx_dropped.c_str() );
+        strcat (msg, " rx_errors:" );
+        strcat (msg, rx_errors.c_str() );
+        strcat (msg, " rx_packets:"  );
+        strcat (msg, rx_packets.c_str() );
 
-        // strcpy (msg, " tx_bytes:");
-        // strcat (msg, tx_bytes.c_str() );
-        // strcat (msg, " tx_dropped:");
-        // strcat (msg, tx_dropped.c_str() );
-        // strcat (msg, " tx_errors:" );
-        // strcat (msg, tx_errors.c_str() );
-        // strcat (msg, " tx_packets:"  );
-        // strcat (msg, tx_packets.c_str() );
+        strcat (msg, " tx_bytes:");
+        strcat (msg, tx_bytes.c_str() );
+        strcat (msg, " tx_dropped:");
+        strcat (msg, tx_dropped.c_str() );
+        strcat (msg, " tx_errors:" );
+        strcat (msg, tx_errors.c_str() );
+        strcat (msg, " tx_packets:"  );
+        strcat (msg, tx_packets.c_str() );
 
-        // send(fd, msg, strlen(msg), 0 ); //send message 
+        //cout << msg << endl;
+        send(fd, msg, strlen(msg), 0 ); //send message 
 
         sleep(1);
     } // END OF LOOP 1.
 }
-//---------------------------------------------------------------
+//--------------------------------------------------------------------
 
 //--------------------------------------------------------------------
-// PRINT NETWORK INTERFACE DATA
+// SETUP LINK
 // @param {string} iName - the interface name
-// @param {int} flags - flag for the setup UP
 // Uses IOCTL to set up the interface, if fails print an error
 //--------------------------------------------------------------------
-void setLinkUp(char *iName, int flags) {
-	struct ifreq ifr;
-	int res = 0;
-	ifr.ifr_flags = flags;       
-	strncpy(ifr.ifr_name, iName, IFNAMSIZ);
-	int fdl = socket(AF_INET, SOCK_DGRAM, 0);
-	if(fdl < 0) {
-		cout << "Unable to create socket for" << iName;
-		return;
-	}
-	// set active flag
-	res = ioctl(fdl, SIOCSIFFLAGS, &ifr);
-	if (res < 0) {
-		cout << "Fail to turn on interface " << iName;
-	}
-	 close(fdl);
+void setLinkUp(char *iName) {
+    // from https://stackoverflow.com/questions/5858655/linux-programmatically-up-down-an-interface-kernel
+    int sockfd;
+    struct ifreq ifr;
+
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0)
+        return;
+
+    memset(&ifr, 0, sizeof ifr);
+    strncpy(ifr.ifr_name, iName, IFNAMSIZ);
+
+    ifr.ifr_flags |= IFF_UP;
+    ioctl(sockfd, SIOCSIFFLAGS, &ifr);
  }
- //--------------------------------------------------------------------
+//--------------------------------------------------------------------
 
 //---------------------------------------------------------------------
 // MAIN
@@ -282,7 +280,7 @@ int main(int argc, char const *argv[])
         // 5. READ MESSAGE FROM SERVER
         rc = read( fd, buffer, 100); 
 
-        // 5.2 START MONITOR AND PRINT STATISTICS
+        // 5.1 START MONITOR AND PRINT STATISTICS
         if (strncmp(buffer, "mon", 3) == 0) {//monitor
             cout << "Received 'monitor' message from server. Starting monitoring.\n";
             sleep (1);
@@ -292,11 +290,14 @@ int main(int argc, char const *argv[])
 
         // 5.2 SET LINK UP MESSAGE
         if (strncmp(buffer, "set", 3) == 0) {//monitor sends 'set link up'
+            sleep (1);
             cout << "Received 'setup interface' message from server. Starting interface.\n";
             sleep (1);
             char * lname = const_cast<char*>(iName.c_str());
-            setLinkUp(lname, 0 | IFF_UP); // calls function to print interface data
+            setLinkUp(lname); // calls function to print interface data
             memset (buffer,'\0',100); //clear buffer
+            sleep(1);
+            printMonitor(iName, fd); // calls function to print interface data
         }
 
         // 5.3 REPLY TO SLEEP REQUEST
